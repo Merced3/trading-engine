@@ -5,7 +5,7 @@ from typing import List, Optional
 from .types import PositionAction, StrategyContext, StrategySignal
 
 
-IS_ENABLED = True # Set to True to enable this strategy
+IS_ENABLED = False # Set to True to enable this strategy
 STRATEGY_BASE_NAME = "candle-ema-break"
 MODE = "single"  # "single" or "multi"
 SINGLE_TIMEFRAME = "2M"

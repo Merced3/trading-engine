@@ -1,50 +1,36 @@
 {
     "version": 1,
-    "week_start": "2026-05-04",
-    "week_end": "2026-05-10",
+    "week_start": "2026-08-17",
+    "week_end": "2026-08-23",
     "timezone": "America/Chicago",
     "source": "tradingeconomics",
     "events": [
         {
-            "date": "2026-05-05",
-            "time_label": "09:00 AM",
-            "title": "ISM Services PMI",
-            "starts_at": "2026-05-05T09:00:00-05:00",
-            "source": "tradingeconomics"
-        },
-        {
-            "date": "2026-05-05",
-            "time_label": "09:00 AM",
-            "title": "JOLTs Job Openings",
-            "starts_at": "2026-05-05T09:00:00-05:00",
-            "source": "tradingeconomics"
-        },
-        {
-            "date": "2026-05-06",
-            "time_label": "09:00 AM",
-            "title": "Ivey PMI s.a",
-            "starts_at": "2026-05-06T09:00:00-05:00",
-            "source": "tradingeconomics"
-        },
-        {
-            "date": "2026-05-08",
+            "date": "2026-08-17",
             "time_label": "07:30 AM",
-            "title": "Non Farm Payrolls",
-            "starts_at": "2026-05-08T07:30:00-05:00",
+            "title": "Inflation Rate YoY",
+            "starts_at": "2026-08-17T07:30:00-05:00",
             "source": "tradingeconomics"
         },
         {
-            "date": "2026-05-08",
+            "date": "2026-08-18",
             "time_label": "07:30 AM",
-            "title": "Unemployment Rate",
-            "starts_at": "2026-05-08T07:30:00-05:00",
+            "title": "Building Permits Prel",
+            "starts_at": "2026-08-18T07:30:00-05:00",
             "source": "tradingeconomics"
         },
         {
-            "date": "2026-05-08",
-            "time_label": "09:00 AM",
-            "title": "Michigan Consumer Sentiment Prel",
-            "starts_at": "2026-05-08T09:00:00-05:00",
+            "date": "2026-08-18",
+            "time_label": "07:30 AM",
+            "title": "Housing Starts",
+            "starts_at": "2026-08-18T07:30:00-05:00",
+            "source": "tradingeconomics"
+        },
+        {
+            "date": "2026-08-19",
+            "time_label": "01:00 PM",
+            "title": "FOMC Minutes",
+            "starts_at": "2026-08-19T13:00:00-05:00",
             "source": "tradingeconomics"
         }
     ]
