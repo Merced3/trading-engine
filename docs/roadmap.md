@@ -2,6 +2,11 @@
 
 This roadmap lists concrete migration work, not aspirational trading features.
 
+> **Architecture reset:** read
+> [the 2026-11-09 architecture critique](reviews/2026-11-09-architecture-critique.md)
+> before major runtime work. Its replay-first gates supersede the temptation to
+> treat the remote-storage migration as production-readiness evidence.
+
 ## Now: standalone, reproducible repository
 
 - Connect the working tree to the existing StratForge Git history.

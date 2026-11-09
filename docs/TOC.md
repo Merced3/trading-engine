@@ -9,6 +9,7 @@ has since changed.
 - [Purpose and boundaries](overview/trading-engine.md)
 - [Architecture map](architecture/overview.md)
 - [Roadmap](roadmap.md)
+- [Architecture critique (2026-11-09)](reviews/2026-11-09-architecture-critique.md)
 - [Project structure](setup/project-structure.md)
 
 ## Runtime
