@@ -1,6 +1,7 @@
 # tests\storage_unit_tests\test_parquet_writer.py
 import duckdb
-import importlib, pandas as pd
+import importlib
+import pandas as pd
 
 def test_append_candle_creates_daily_parquet(tmp_storage):
     # Import after monkeypatch so parquet_writer sees patched paths

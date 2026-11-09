@@ -9,7 +9,6 @@ from pathlib import Path
 from datetime import datetime
 from utils.data_utils import get_dates
 from utils.json_utils import read_config
-from pathlib import Path
 from paths import pretty_path, TIMELINE_OBJECTS_DIR, DATA_DIR, CURRENT_OBJECTS_PATH
 from storage.objects.io import (      # Parquet-backed storage helpers
     append_timeline_events,

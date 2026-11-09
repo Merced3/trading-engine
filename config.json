@@ -41,14 +41,6 @@
         "update_existing": true
     },
     "STRATEGY_TAG_INCLUDE_TIMEFRAME": true,
-    "RESEARCH_SIGNALS_ENABLED": false,
-    "RESEARCH_SIGNALS_TIMEFRAMES": [
-        "2M",
-        "5M",
-        "15M"
-    ],
-    "RESEARCH_TOUCH_POLL_SECS": 1.0,
-    "RESEARCH_TOUCH_TOLERANCE": 0.02,
     "MINS_BEFORE_MAJOR_NEWS_ORDER_CANCELATION": 20,
     "LIVE_BARS": {
         "2M": 195,

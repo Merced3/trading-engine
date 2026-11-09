@@ -1,5 +1,6 @@
 # pipeline/data_pipeline.py
-import json, asyncio
+import json
+import asyncio
 from datetime import datetime, timedelta
 from utils.time_utils import generate_candlestick_times, add_seconds_to_time
 from pipeline.state import reset_day_state

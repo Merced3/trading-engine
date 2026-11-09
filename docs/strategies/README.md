@@ -1,6 +1,6 @@
 # Strategies — Registry & Contracts
 
-StratForge can run multiple strategies concurrently over one symbol. A strategy reads shared state (latest price, candles, objects) and emits **orders** and/or **annotations** (markers/flags) that the UI and storage can render.
+Trading Engine can run multiple strategies concurrently over one symbol. A strategy reads shared state (latest price, candles, objects) and emits **orders** and/or **annotations** (markers/flags) that the UI and storage can render.
 
 ## Built‑in examples
 

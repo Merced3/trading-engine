@@ -201,7 +201,8 @@ def test_next_object_id_from_snapshot(tmp_path, monkeypatch):
     assert nxt == 10  # 00010 is next
 
 def test_remove_event_marks_snapshot_and_timeline(tmp_path, monkeypatch):
-    import importlib, pandas as pd
+    import importlib
+    import pandas as pd
     paths = importlib.import_module("paths")
     io = importlib.import_module("storage.objects.io")
     objs = importlib.import_module("objects")
@@ -312,7 +313,9 @@ def test_eod_pipeline_writes_timeline_and_snapshot(tmp_path, monkeypatch):
         assert col in snap.columns
 
 def test_eod_is_idempotent(tmp_path, monkeypatch):
-    import importlib, pandas as pd, paths
+    import importlib
+    import pandas as pd
+    import paths
     io   = importlib.import_module("storage.objects.io")
     objs = importlib.import_module("objects")
 
@@ -354,7 +357,9 @@ def test_eod_is_idempotent(tmp_path, monkeypatch):
     assert snap["id"].is_unique
 
 def test_eod_uses_min_global_x_as_offset(tmp_path, monkeypatch):
-    import importlib, pandas as pd, paths
+    import importlib
+    import pandas as pd
+    import paths
     io   = importlib.import_module("storage.objects.io")
     objs = importlib.import_module("objects")
 

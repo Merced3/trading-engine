@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 from options.selection import (
-    DEFAULT_SELECTOR_REGISTRY,
     PriceRangeOtmSelector,
     SelectionRequest,
     SelectorRegistry,

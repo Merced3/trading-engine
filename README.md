@@ -1,71 +1,85 @@
-# StratForge ⚡️
+# Trading Engine
 
-**StratForge** is a **single‑asset, multi‑strategy trading engine**. It is designed to run multiple algorithmic strategies side‑by‑side on the same symbol (default: SPY, but you can configure any ticker your data provider/websocket supports). Built for extensibility, StratForge emphasizes modular design, durable storage, and future self‑learning capabilities.
+A personal options trading engine that runs multiple strategies against shared
+market data on multiple candle timeframes. It currently targets one configured
+underlying symbol at a time (SPY by default) and supports paper execution.
 
-> ⚠️ Educational and personal use only. Not financial advice.
+The project's scope is deliberately narrow:
 
----
+- acquire market data and build candles;
+- run independent strategies on the configured timeframes;
+- manage option selection, orders, positions, and end-of-day exits;
+- retain trade events and calculate strategy performance;
+- expose charts and operational notifications.
 
-## Key Features
+Autonomous strategy research and self-learning claims have been removed. A
+strategy must be explicitly implemented, tested, and registered before the
+engine can run it.
 
-* **Multi‑strategy host** — Flag Zone, Momentum, Trend, Mean Reversion, and more.
-* **Ticker‑agnostic** — Change `config.json` to trade any symbol supported by your provider.
-* **Robust storage** — Append‑only Parquet + DuckDB queries, with daily/monthly compaction.
-* **Event‑sourced objects** — Zones, levels, markers, and flags, queryable by time/price windows.
-* **Live visuals** — Plotly Dash frontend + FastAPI WebSocket broadcaster.
-* **Future‑proofed** — Storage contracts and APIs designed for eventual self‑learning extensions.
+> Educational and personal use only. Not financial advice. Real-money execution
+> must remain disabled until its safety and deployment paths have been reviewed.
 
----
+## Current state
 
-## Quick Start
+The engine works as a long-running local Python process, but it is **not yet
+VPS-ready**. Market data, objects, trade events, configuration, and some runtime
+state are still file-backed. It also owns a direct Discord connection. Remote
+storage, automation-harness lifecycle management, and discord-hub transport are
+separate migrations; this repository does not pretend they are already done.
+
+## Requirements
+
+- Python 3.11 or newer (Python 3.13 is used for local development and CI)
+- the sibling `automation-harness` checkout
+- provider credentials for market data and brokers, when used
+
+## Setup
+
+From `Automations/projects`:
 
 ```bash
-# clone and enter
-$ git clone git@github.com:Merced3/Flag-Zone-Bot.git
-$ cd Flag-Zone-Bot
-
-# create venv + install deps
-$ python -m venv venv
-$ source venv/bin/activate
-$ pip install -r requirements.txt
-
-# run engine
-$ python main.py
+cd trading-engine
+python -m venv .venv
+source .venv/Scripts/activate       # Git Bash on Windows
+python -m pip install --upgrade pip
+python -m pip install -e ../automation-harness
+python -m pip install -e ".[dev]"
+cp cred-example.py cred.py          # then fill local secrets; never commit it
+pytest
+ruff check .
 ```
 
-Configure your ticker and timeframes in [`config.json`](docs/configuration/ticker-and-timeframes.md).
+`automation-harness` is declared as a runtime dependency for the lifecycle
+migration. Installing the sibling checkout first avoids relying on an
+unpublished package index release.
 
----
+## Run
 
-## Docs
+```bash
+python main.py
+```
 
-StratForge is documentation‑first. See the [`docs/`](docs/TOC.md) folder for full details.
+Review `config.json`, especially `REAL_MONEY_ACTIVATED`, before starting. Tests
+stub credentials and do not start live provider, broker, or Discord connections.
 
-* [Overview](docs/overview/stratforge.md)
-* [Architecture](docs/architecture/overview.md)
-* [Storage System](docs/data/storage-system.md)
-* [Strategies](docs/strategies/README.md)
-* [Configuration](docs/configuration/ticker-and-timeframes.md)
-* [Runbooks](docs/runbooks/)
-* [ADRs](docs/adr/)
+## Development
 
----
+```bash
+pytest
+ruff check .
+python -m pip install -e ".[postgres]"  # Postgres/Alembic migration tooling
+```
 
-## Example Output
+The codebase is still in its original flat-module layout. Moving modules under
+`src/` is intentionally deferred until imports and runtime entry points can be
+changed with test coverage, rather than mixed into the storage migration.
 
-Latest charts are written to `storage/images/` and served live in the Dash UI.
+## Documentation
 
-![15M Chart](storage/images/SPY_15M_chart.png)
-
----
-
-## Contributing
-
-StratForge is a personal project, but PRs, discussions, and feedback are welcome. Tests live under `tests/` and run via GitHub Actions.
-
----
-
-## Disclaimer
-
-This software is for **educational and research purposes only**.
-It is **not financial advice**. Use at your own risk.
+- [Purpose and current boundaries](docs/overview/trading-engine.md)
+- [Architecture map](docs/architecture/overview.md)
+- [Options subsystem](docs/architecture/options-subsystem.md)
+- [Current storage](docs/data/storage-system.md)
+- [Strategies](docs/strategies/README.md)
+- [Configuration](docs/configuration/ticker-and-timeframes.md)
+- [Roadmap](docs/roadmap.md)

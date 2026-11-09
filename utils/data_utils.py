@@ -66,7 +66,7 @@ def get_dates(num_of_days, use_todays_date=False, use_specific_start_date=None):
             start = start - timedelta(days=start.weekday() - 4)
 
     # Adjust start date if it's a holiday or weekend
-    while not nyse.valid_days(start_date=start, end_date=start).empty is False or start.weekday() > 4:
+    while nyse.valid_days(start_date=start, end_date=start).empty is not False or start.weekday() > 4:
         start -= timedelta(days=1)
         if start.weekday() > 4:  # Adjust if still weekend
             start -= timedelta(days=start.weekday() - 4)

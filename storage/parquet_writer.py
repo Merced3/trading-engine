@@ -1,6 +1,7 @@
 # storage/parquet_writer.py
 from __future__ import annotations
-import json, uuid
+import json
+import uuid
 from typing import Optional
 import pandas as pd
 import paths                      # <- central paths

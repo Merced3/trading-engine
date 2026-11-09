@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 
-import pytest
 
 from options.position_watcher import PositionUpdate
 from options.quote_service import OptionContract, OptionQuote

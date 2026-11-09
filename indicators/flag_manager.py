@@ -631,7 +631,7 @@ def return_breakout_info_setup(current_point, status):
 def determine_flag_cancel_reason(vp_1, vp_2, correct_flag):
     reasons = []
     if not vp_1 and not vp_2:
-        reasons.append(f"Invalid points; Both Points None")
+        reasons.append("Invalid points; Both Points None")
     if not vp_1 or not vp_2:
         point = "Point 1 None" if not vp_1 else "Point 2 None"
         reasons.append(f"Invalid points; {point}")

@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import dash
-from dash import dcc, html, callback, ctx
+from dash import dcc, html, callback
 from dash.dependencies import Input, Output, MATCH, State
 from dash_extensions import WebSocket
 import dash.exceptions

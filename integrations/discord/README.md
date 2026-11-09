@@ -1,6 +1,6 @@
 # Discord Integration
 
-This folder contains the Discord integration for StratForge. The goal is to keep all Discord-specific logic here so the rest of the codebase can stay decoupled.
+This folder contains Trading Engine's current direct Discord integration. It is legacy transport and will be replaced by discord-hub HTTP calls in a separate migration.
 
 ## Files
 
@@ -12,7 +12,7 @@ This folder contains the Discord integration for StratForge. The goal is to keep
 ```python
 from integrations.discord.client import bot, print_discord, send_file_discord
 
-await print_discord("Hello from StratForge")
+await print_discord("Hello from Trading Engine")
 await send_file_discord("storage/images/spy_chart.png")
 ```
 

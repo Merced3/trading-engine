@@ -1,9 +1,8 @@
 # tests/runtime/test_main_loop.py
 import asyncio
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import pytest
-import pytz
 from types import SimpleNamespace
 from contextlib import suppress
 

@@ -4,10 +4,7 @@ from typing import Union
 import pandas as pd
 
 from datetime import datetime, timedelta
-import time
 
-from pathlib import Path
-from typing import Optional, Iterable
 from utils.timezone import NY_TZ
 
 # ───🔹 CANDLESTICK TIMESTAMP-MATCH FOR MAIN SCRIPT ────────────────────────

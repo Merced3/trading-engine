@@ -2,7 +2,8 @@
 # target the package functions.
 
 # tests/runtime/test_data_pipeline.py
-import asyncio, json
+import asyncio
+import json
 import pytest
 from datetime import datetime, timedelta
 from types import SimpleNamespace

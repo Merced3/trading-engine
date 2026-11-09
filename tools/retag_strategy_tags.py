@@ -12,12 +12,9 @@ Purpose:
   historical joins.
 
 What it targets by default:
-- V1 ledger: storage/options/trade_events.jsonl
-- V2 ledgers:
-  - storage/options/analytics/strategy_signals.jsonl
-  - storage/options/analytics/strategy_paths.jsonl
-  - storage/options/analytics/path_metrics.jsonl
-  - storage/options/analytics/rule_simulations.jsonl
+- Trade ledger: storage/options/trade_events.jsonl
+
+Additional JSONL files can be supplied explicitly with `--paths`.
 
 Common usage (safe, non-destructive):
   python tools/retag_strategy_tags.py --map "ema-crossover=ema-crossover-15m"
@@ -37,9 +34,6 @@ Specific files only:
     --map "ema-crossover=ema-crossover-15m" \
     --paths storage/options/trade_events.jsonl
 
-After retagging V2 data, recompute derived outputs:
-  python tools/analytics_v2/compute_path_metrics.py
-  python tools/analytics_v2/simulate_rules.py
 """
 
 import argparse
@@ -52,22 +46,10 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from paths import (
-    OPTIONS_RESEARCH_METRICS_PATH,
-    OPTIONS_RESEARCH_PATHS_PATH,
-    OPTIONS_RESEARCH_SIGNALS_PATH,
-    OPTIONS_RESEARCH_SIM_PATH,
-    OPTIONS_TRADE_LEDGER_PATH,
-)
+from paths import OPTIONS_TRADE_LEDGER_PATH
 
 
-DEFAULT_PATHS = [
-    OPTIONS_TRADE_LEDGER_PATH,
-    OPTIONS_RESEARCH_SIGNALS_PATH,
-    OPTIONS_RESEARCH_PATHS_PATH,
-    OPTIONS_RESEARCH_METRICS_PATH,
-    OPTIONS_RESEARCH_SIM_PATH,
-]
+DEFAULT_PATHS = [OPTIONS_TRADE_LEDGER_PATH]
 
 
 def _parse_map(values: Iterable[str]) -> Dict[str, str]:

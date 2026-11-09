@@ -1,31 +1,42 @@
-# Architecture Overview
+# Architecture overview
 
-> **Purpose:** A map-of-maps. Start here to jump to each subsystem.
+## Current dataflow
 
-## Frontend (Dash + WS)
+```text
+Provider stream/REST
+  → candle pipeline
+  → market event bus
+  → explicit option strategies on each configured timeframe
+  → shared order manager and position watcher
+  → trade-event ledger and performance reports
+```
 
-- **Read this first:** `docs/architecture/frontend-overview.md`
-- Live charts from Parquet; WebSocket `chart:<TF>` signals trigger re-render.
+Candles and objects currently use local Parquet. Trade events use JSONL; EMA,
+marker, calendar, and reporting state use JSON; charts and logs are local files.
+DuckDB provides query helpers over Parquet. The R2/Postgres replacement is not
+implemented yet.
 
-## Storage & Data
+## Subsystems
 
-- Candles (parts → dayfile) and Objects (timeline → snapshot):  
-  `docs/data/storage-system.md`
-- API for fetching a window of candles + objects:  
-  `docs/api/storage-viewport.md`
+- **Pipeline:** `pipeline/`, `data_acquisition.py`, and `session.py` acquire and
+  normalize provider data and build candle-close events.
+- **Runtime:** `runtime/market_bus.py` fans events out to strategies;
+  `options_strategy_runner.py` translates strategy intents into order actions.
+- **Options:** `options/` handles quotes, contract selection, execution,
+  positions, and the trade-event ledger.
+- **Strategies:** `strategies/options/` contains explicitly implemented
+  strategies and shared types/exit rules.
+- **Indicators and objects:** `indicators/`, `objects.py`, and `storage/objects/`
+  maintain strategy/chart inputs.
+- **Storage:** `storage/` owns local Parquet reads/writes and viewport queries.
+- **Frontend:** `web_dash/` renders charts and handles refresh notifications.
+- **Integrations:** Discord and economic-calendar code currently live under
+  `integrations/`. Discord will later move behind discord-hub's HTTP contract.
+- **Orchestration:** `main.py` still owns lifecycle and scheduling. Generic
+  lifecycle concerns will later move to automation-harness.
 
-## Engine (future)
+## Change boundaries
 
-- Strategy loop, signals, state machines: *(planned; stub exists)* `docs/architecture/engine-overview.md`
-- Orders & tracking (brokers, fills, P&L): *(planned; stub exists)* `docs/architecture/orders-and-tracking.md`
-
-## Configuration
-
-- Symbol & timeframes (what we build and display):  
-  `docs/configuration/ticker-and-timeframes.md`
-
----
-
-### Quick dataflow (one line)
-
-Market stream → build candles → **write Parquet parts** → compaction (dayfile) → Dash loads from Parquet → WS `chart:<TF>` refresh.
+Do not combine storage cutover, Discord migration, harness adoption, and VPS
+enablement into one unverifiable change. Each needs offline tests and its own
+rollback path. See `docs/roadmap.md` and the P2f session prompt.

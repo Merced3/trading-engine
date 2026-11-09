@@ -1,0 +1,96 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "trading-engine"
+version = "0.1.0"
+description = "Multi-strategy, multi-timeframe options trading engine"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Merced3" },
+]
+dependencies = [
+  "aiohttp>=3.9,<4",
+  "automation-harness>=0.5.0,<1",
+  "boto3>=1.35,<2",
+  "dash>=3.2,<4",
+  "dash-extensions>=1.0,<3",
+  # Direct Discord transport is legacy and will be removed in the hub migration.
+  "discord.py>=2.0,<3",
+  "duckdb>=1.0,<2",
+  "fastapi>=0.115,<1",
+  "httpx>=0.27,<1",
+  "kaleido>=1.0,<2",
+  "matplotlib>=3.8,<4",
+  "mplfinance>=0.12.10b0,<1",
+  "natsort>=8.4,<9",
+  "numpy>=1.26,<3",
+  "pandas>=2.1,<3",
+  "pandas-market-calendars>=4.4,<5",
+  "plotly>=6.2,<7",
+  "polygon-api-client>=1.13,<2",
+  "pyarrow>=16,<24",
+  "pydantic-settings>=2.5,<3",
+  "python-dateutil>=2.8,<3",
+  "python-dotenv>=1.0,<2",
+  "pytz>=2023.3",
+  "requests>=2.31,<3",
+  "selenium>=4.15,<5",
+  "tzdata>=2023.3",
+  "uvicorn>=0.30,<1",
+  "webdriver-manager>=4,<5",
+  "websockets>=11,<16",
+]
+
+[project.optional-dependencies]
+postgres = [
+  "alembic>=1.14,<2",
+  "psycopg[binary]>=3.2,<4",
+]
+dev = [
+  "alembic>=1.14,<2",
+  "psycopg[binary]>=3.2,<4",
+  "pytest>=8,<10",
+  "pytest-asyncio>=0.24,<2",
+  "ruff>=0.9,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+  "/*.py",
+  "/indicators",
+  "/integrations",
+  "/migrations",
+  "/alembic.ini",
+  "/options",
+  "/pipeline",
+  "/runtime",
+  "/storage",
+  "/strategies",
+  "/tools",
+  "/utils",
+  "/web_dash",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+# Legacy layout/style debt deferred from the initial reproducibility pass.
+ignore = ["E402", "E701", "E702", "E712", "E721", "E722", "E731", "E741", "F841"]
+
+# Lint gates should tighten as modules are modernized, not be made useless by
+# the legacy import/style debt in the first standalone-repository cleanup.
+[tool.ruff.lint.per-file-ignores]
+"*.py" = ["E501", "I001", "UP", "B", "SIM"]
+"tests/**" = ["E402"]

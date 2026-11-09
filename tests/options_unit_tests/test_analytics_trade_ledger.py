@@ -65,7 +65,7 @@ def test_compute_metrics_from_fixture():
     assert metrics["top_symbol"] == "SPY"
     assert metrics["top_symbol_count"] == 2
     assert metrics["top_symbol_pct"] == pytest.approx(1.0)
-    assert metrics["sample_flag"] == "2 trades (LOW)"
+    assert metrics["sample_flag"] == "2 trades (LOW STATISTICAL VALUE)"
     assert metrics["pnl_total"] == 60.0
     assert metrics["entry_cost"] == pytest.approx(460.0)
     assert metrics["pnl_per_dollar"] == pytest.approx(60.0 / 460.0)

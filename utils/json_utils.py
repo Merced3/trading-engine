@@ -5,7 +5,7 @@ from shared_state import indent, print_log, safe_write_json
 from utils.file_utils import get_current_candle_index
 import pandas as pd
 import os
-from paths import pretty_path, get_ema_path, CONFIG_PATH, MARKERS_PATH, MESSAGE_IDS_PATH, ORDER_CANDLE_TYPE_PATH, PRIORITY_CANDLES_PATH, LINE_DATA_PATH
+from paths import pretty_path, get_ema_path, CONFIG_PATH, MESSAGE_IDS_PATH, ORDER_CANDLE_TYPE_PATH, PRIORITY_CANDLES_PATH, LINE_DATA_PATH
 
 def read_config(key=None):
     """Reads the configuration file and optionally returns a specific key."""

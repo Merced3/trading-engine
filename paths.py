@@ -22,11 +22,6 @@ MARKERS_DIR = STORAGE_DIR / 'markers'                                   # Per-ti
 OPTIONS_STORAGE_DIR = STORAGE_DIR / 'options'                           # Local options-only storage (ledger, snapshots, or other option data).
 OPTIONS_TRADE_LEDGER_PATH = OPTIONS_STORAGE_DIR / 'trade_events.jsonl'  # Append-only ledger for trades.
 OPTIONS_QUOTES_DIR = OPTIONS_STORAGE_DIR / 'quotes'                     # Optional quote recordings (JSONL) by trading day.
-OPTIONS_ANALYTICS_DIR = OPTIONS_STORAGE_DIR / 'analytics'               # Decoupled analytics-only storage (research signals, path logs).
-OPTIONS_RESEARCH_SIGNALS_PATH = OPTIONS_ANALYTICS_DIR / 'strategy_signals.jsonl'  # Research signal ledger (entry-only, hypothetical).
-OPTIONS_RESEARCH_PATHS_PATH = OPTIONS_ANALYTICS_DIR / 'strategy_paths.jsonl'  # Research path events (post-entry).
-OPTIONS_RESEARCH_METRICS_PATH = OPTIONS_ANALYTICS_DIR / 'path_metrics.jsonl'  # Derived metrics per research signal.
-OPTIONS_RESEARCH_SIM_PATH = OPTIONS_ANALYTICS_DIR / 'rule_simulations.jsonl'  # Rule simulation outputs.
 
 # Objects folder
 OBJECTS_DIR = STORAGE_DIR / 'objects'                                   # The `storage/objects/` folder contains zones and levels calculated by `objects.py`. We consider Zones and Levels as objects.
@@ -57,9 +52,9 @@ WEEK_ECOM_CALENDER_PATH = STORAGE_DIR / 'week_ecom_calendar.json'       # This i
 CSV_DIR = STORAGE_DIR / 'csv'
 ORDER_LOG_PATH = CSV_DIR / 'order_log.csv'                              # This is needed for logging all orders made during the trading session. For further study later on.
 SPY_15_MINUTE_CANDLES_PATH = CSV_DIR / 'SPY_15_minute_candles.csv'      # This is needed for 2 reasons; 1) this is previous days 15 min candles to not only plot previous history but used to calulate zones and levels, 2) As a backup of the parquet data, just in case something goes wrong with the parquet data, this is a quick way to get the data back.
-AFTERMARKET_EMA_PATH = CSV_DIR / f"SPY_2_minute_AFTERMARKET.csv"        # IDK if these are used, I do see them used in `indicators/ema_manager.py` but I don't know if this is used in practice or is just ghost code, if it is I will remove it in the future.
-PREMARKET_EMA_PATH = CSV_DIR / f"SPY_2_minute_PREMARKET.csv"            # IDK if these are used, I do see them used in `indicators/ema_manager.py` but I don't know if this is used in practice or is just ghost code, if it is I will remove it in the future.
-MERGED_EMA_PATH = CSV_DIR / f"SPY_MERGED.csv"                           # IDK if these are used, I do see them used in `indicators/ema_manager.py` but I don't know if this is used in practice or is just ghost code, if it is I will remove it in the future.
+AFTERMARKET_EMA_PATH = CSV_DIR / "SPY_2_minute_AFTERMARKET.csv"        # IDK if these are used, I do see them used in `indicators/ema_manager.py` but I don't know if this is used in practice or is just ghost code, if it is I will remove it in the future.
+PREMARKET_EMA_PATH = CSV_DIR / "SPY_2_minute_PREMARKET.csv"            # IDK if these are used, I do see them used in `indicators/ema_manager.py` but I don't know if this is used in practice or is just ghost code, if it is I will remove it in the future.
+MERGED_EMA_PATH = CSV_DIR / "SPY_MERGED.csv"                           # IDK if these are used, I do see them used in `indicators/ema_manager.py` but I don't know if this is used in practice or is just ghost code, if it is I will remove it in the future.
 
 def get_merged_ema_csv_path(timeframe: str):                            # This is needed, its used in `data_acquisition.py` from the function `get_candle_data_and_merge()` which is called in `indicators/ema_manager.py` in the function `update_ema()`. This is used to get the merged candles of premarket, aftermarket and regular market hours for EMA calculations.
     return CSV_DIR / f"merged_ema_{timeframe}.csv"

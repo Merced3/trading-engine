@@ -1,6 +1,19 @@
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+artifacts/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
 
 # Logs
 logs/

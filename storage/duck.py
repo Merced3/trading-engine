@@ -1,5 +1,6 @@
 # storage/duck.py
-import duckdb, threading
+import duckdb
+import threading
 
 _lock = threading.Lock()
 _conn = None

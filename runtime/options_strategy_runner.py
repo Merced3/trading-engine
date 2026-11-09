@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import asyncio
-import importlib
 import inspect
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional
 
@@ -426,32 +424,3 @@ def _tag_matches(base: str, tag: Optional[str]) -> bool:
     if tag == base:
         return True
     return tag.startswith(f"{base}-")
-
-
-def discover_strategies(root: Optional[Path] = None) -> List[object]:
-    # Strategy modules should expose build_strategy() returning an object with
-    # a .name and on_candle_close(context) -> StrategySignal|None.
-    base = root or Path(__file__).resolve().parents[1] / "strategies" / "options"
-    if not base.exists():
-        return []
-    strategies: List[object] = []
-    for path in sorted(base.glob("*.py")):
-        if path.name.startswith("_") or path.name in ("types.py", "exit_rules.py"):
-            continue
-        module_name = f"strategies.options.{path.stem}"
-        try:
-            module = importlib.import_module(module_name)
-        except Exception:
-            continue
-        build = getattr(module, "build_strategy", None)
-        if not callable(build):
-            continue
-        try:
-            built = build()
-        except Exception:
-            continue
-        if isinstance(built, (list, tuple)):
-            strategies.extend([item for item in built if item is not None])
-        elif built is not None:
-            strategies.append(built)
-    return strategies

@@ -14,7 +14,7 @@ Fast reads, safe incremental writes, and small files during the session. We writ
 ## What lives where
 
 ```bash
-Flag-Zone-Bot/
+trading-engine/
 ├─ storage/
 │  ├─ data/
 │  │  ├─ 2m/
