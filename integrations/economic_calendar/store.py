@@ -1,4 +1,3 @@
-import json
 from datetime import date, datetime
 from pathlib import Path
 from typing import Optional
@@ -6,7 +5,7 @@ from typing import Optional
 import pytz
 
 from paths import WEEK_ECOM_CALENDER_PATH, pretty_path
-from shared_state import print_log
+from shared_state import print_log, safe_read_json, safe_write_json
 
 from .models import EconomicCalendarWeek, EconomicEvent
 
@@ -26,13 +25,8 @@ class EconomicCalendarStore:
         self.logger = logger
 
     def load_week(self) -> Optional[EconomicCalendarWeek]:
-        if not self.path.exists():
-            return None
-        try:
-            with open(self.path, "r") as handle:
-                data = json.load(handle)
-        except (OSError, json.JSONDecodeError) as exc:
-            self.logger(f"[ECON] Failed to read {pretty_path(self.path)}: {exc}")
+        data = safe_read_json(self.path, default={})
+        if not data:
             return None
 
         if isinstance(data, dict) and "week_timespan" in data and "dates" in data:
@@ -51,10 +45,7 @@ class EconomicCalendarStore:
         return week
 
     def save_week(self, week: EconomicCalendarWeek) -> None:
-        payload = self._to_payload(week)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.path, "w") as handle:
-            json.dump(payload, handle, indent=4)
+        safe_write_json(self.path, self._to_payload(week))
 
     def _from_payload(self, payload: dict) -> Optional[EconomicCalendarWeek]:
         timezone_name = payload.get("timezone") or self.default_timezone

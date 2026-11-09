@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import sys
 from dataclasses import dataclass
@@ -57,8 +58,17 @@ def _safe_float(value: object) -> Optional[float]:
 
 
 def _load_positions(path: Path) -> list[PositionSummary]:
+    from storage.remote import remote_enabled
+
+    if remote_enabled():
+        from storage.trade_events import load_trade_payloads
+
+        serialized = "\n".join(json.dumps(payload) for payload in load_trade_payloads())
+        handle = io.StringIO(serialized)
+    else:
+        handle = path.open("r", encoding="utf-8")
     positions: dict[str, PositionSummary] = {}
-    with path.open("r", encoding="utf-8") as handle:
+    with handle:
         for line in handle:
             line = line.strip()
             if not line:

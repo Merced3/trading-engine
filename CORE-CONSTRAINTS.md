@@ -17,8 +17,9 @@ Guardian paths:
 ## Data and deployment safety
 
 - Do not delete or rewrite historical `storage/` data during refactors.
-- Remote storage requires an inventory, design review, verified copy, rollback
-  path, and explicit cutover. Local files remain authoritative until then.
+- Remote storage is active. Keep the `local` rollback backend working and local
+  historical files deletion-gated until backup/restore evidence and owner
+  approval satisfy the ops deletion gate.
 - Database schema changes require migrations and a rollback/recovery story.
 - VPS deployment and real-money enablement are separate approvals.
 

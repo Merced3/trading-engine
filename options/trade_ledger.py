@@ -79,10 +79,17 @@ def record_trade_event(
     path: Optional[Path] = None,
     logger=None,
 ) -> None:
-    target = path or OPTIONS_TRADE_LEDGER_PATH
-    target.parent.mkdir(parents=True, exist_ok=True)
-    payload = json.dumps(asdict(event), ensure_ascii=True)
+    from storage.remote import remote_enabled
+
     try:
+        if remote_enabled() and path is None:
+            from storage.trade_events import record_trade_event as record_remote_trade_event
+
+            record_remote_trade_event(event)
+            return
+        target = path or OPTIONS_TRADE_LEDGER_PATH
+        target.parent.mkdir(parents=True, exist_ok=True)
+        payload = json.dumps(asdict(event), ensure_ascii=True)
         with target.open("a", encoding="utf-8") as handle:
             handle.write(payload + "\n")
     except Exception as exc:
@@ -96,6 +103,12 @@ def sum_realized_pnl_for_day(
 ) -> float:
     if not trading_day:
         trading_day = datetime.now(NY_TZ).strftime("%Y-%m-%d")
+    from storage.remote import remote_enabled
+
+    if remote_enabled() and path is None:
+        from storage.trade_events import sum_realized_pnl_for_day as sum_remote_pnl
+
+        return sum_remote_pnl(trading_day)
     target = path or OPTIONS_TRADE_LEDGER_PATH
     if not target.exists():
         return 0.0

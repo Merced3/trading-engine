@@ -9,8 +9,8 @@ multi-strategy, multi-timeframe options trading engine.
 - Do not add autonomous strategy generation, research agents, or self-learning
   claims. Those were intentionally removed. Executable strategies must be
   explicitly registered in `strategies/options/__init__.py`.
-- Preserve multi-timeframe strategy execution and the append/query behavior of
-  current storage until a tested remote-storage replacement exists.
+- Preserve multi-timeframe strategy execution and remote append/query contracts.
+  R2/Postgres is current; `TRADING_STORAGE_BACKEND=local` is the rollback path.
 - Treat broker, provider, Discord, and VPS operations as external side effects.
   Offline tests must not start them or require real credentials.
 - `automation-harness` should eventually own generic lifecycle concerns.

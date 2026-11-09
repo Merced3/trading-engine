@@ -1,5 +1,23 @@
 # Storage System — Overview & Contracts
 
+## Remote backend (current)
+
+Set `TRADING_STORAGE_BACKEND=r2`. Candle/object Parquet lives in R2 and is read
+through DuckDB; Postgres catalogs object keys, checksums, ranges, quality, and
+row counts. Candle writes upsert complete sorted dayfiles by
+`(symbol,timeframe,ts)`, so no local part files or EOD compaction are needed.
+Before a differing replacement, the prior complete object is archived under
+`v1/versions/` in a separate `*_versions` catalog dataset. Current/timeline
+objects use the same R2 backend. Trade events and durable
+config/JSON state use Postgres tables. See `remote-storage-design.md` and the
+migration runbook.
+
+`TRADING_STORAGE_BACKEND=local` selects the legacy layout below for rollback.
+Local historical files are retained under the ops deletion gate, not written in
+remote mode. Raw quote capture must remain disabled until it has an R2 writer.
+
+## Legacy local backend (rollback)
+
 ## Why
 
 Fast reads, safe incremental writes, and small files during the session. We write Parquet parts and compact them later; DuckDB reads via simple globs.

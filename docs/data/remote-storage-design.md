@@ -1,8 +1,9 @@
 # Proposed remote storage design — review required
 
-Status: **approved; initial upload and remote verification complete**. Runtime
-cutover has not started. See P2f Session Progress for verified counts and the
-DuckDB/Postgres slice benchmark.
+Status: **implemented and verified**. Initial upload, remote reads/writes,
+trade-event migration, and runtime config/state cutover are complete. Local
+source files remain rollback evidence under the deletion gate. See P2f Session
+Progress for counts, acceptance checks, and the DuckDB/Postgres benchmark.
 
 ## Why two systems
 
@@ -104,7 +105,9 @@ logs, and any cache are disposable and never the only copy.
 ## Rollback
 
 The `v1/` prefix and local source files remain unchanged during verification. A
-failed adapter test leaves the engine on its existing local backend. A failed
-post-cutover run can disable remote writes and resume from the last verified
-catalog state; no remote object is overwritten in place without a new version
-and catalog transaction.
+failed adapter test leaves the engine on its existing local backend. Runtime
+updates archive the prior complete object under `v1/versions/` and catalog it in
+a separate `*_versions` dataset before replacing the current object/checksum in
+one catalog transaction. Version datasets are excluded from viewport reads. A
+failed post-cutover run can disable remote writes and restore a prior cataloged
+version; local sources remain deletion-gated rollback evidence.

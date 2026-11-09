@@ -57,7 +57,21 @@ DuckDB reads the Parquet files directly from R2 and compares row counts for ever
 object key with the local manifest. Any missing object or row-count difference is
 an error. Do not cut over the engine until this succeeds.
 
-## 5. Stop before runtime cutover
+## 5. Runtime cutover and acceptance
+
+Set `TRADING_STORAGE_BACKEND=r2` in the project environment. Shared R2/Postgres
+credentials are discovered from the ops env files. The runtime now writes compact
+R2 dayfiles, stores trade events and durable JSON/config in Postgres, and skips
+legacy EOD part compaction. Keep `RECORD_OPTIONS_QUOTES=false` until raw capture
+has an R2 implementation.
+
+Verified acceptance: live latest-day viewport returned 26 candles and current
+objects returned 254 rows; an idempotent validation candle write passed; 6,859
+trade events imported with identical strategy metrics; config + 14 JSON states
+imported; validation trade/state writes created no local files and were removed.
+The full offline suite is 89 passing. Keep `local` as the rollback setting.
+
+## 6. Migration evidence
 
 ### Completed initial migration evidence (2026-11-08)
 

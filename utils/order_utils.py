@@ -182,6 +182,10 @@ def to_float(value):
         raise ValueError("Value must be a string or a number")
 
 def initialize_csv_order_log():
+    from storage.remote import remote_enabled
+
+    if remote_enabled():
+        return  # Legacy CSV order details are superseded by Postgres trade_events.
     if not os.path.exists(ORDER_LOG_PATH):
         with open(ORDER_LOG_PATH, 'w', newline='') as file:
             writer = csv.writer(file)

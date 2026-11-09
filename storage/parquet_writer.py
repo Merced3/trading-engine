@@ -26,8 +26,6 @@ def append_candle(symbol: str, timeframe: str, candle: dict):
     ts_iso = to_iso(ts_ms)                        # <— stable, UTC ISO for humans/tools
 
     day = _day_from_ms(ts_ms)
-    day_dir = paths.DATA_DIR / timeframe.lower() / day
-    day_dir.mkdir(parents=True, exist_ok=True)
 
     # 1-row dataframe
     df = pd.DataFrame([{
@@ -42,6 +40,16 @@ def append_candle(symbol: str, timeframe: str, candle: dict):
         "volume": float(candle.get("volume", 0)),
     }])
 
+    from storage.remote import remote_enabled
+
+    if remote_enabled():
+        from storage.remote import get_remote_store
+
+        get_remote_store().append_candle(symbol, timeframe, df)
+        return
+
+    day_dir = paths.DATA_DIR / timeframe.lower() / day
+    day_dir.mkdir(parents=True, exist_ok=True)
     # unique file per row
     out = day_dir / f"part-{_safe_file_name_from_iso(ts_iso)}-{uuid.uuid4().hex[:8]}.parquet"
     df.to_parquet(out, index=False)

@@ -29,6 +29,11 @@ python tools/compact_parquet.py --timeframe 15m --month 2025-09 --keep-parts
 """
 
 def end_of_day_compaction(day: str, TFs: list = ("2m", "5m", "15m")) -> None:
+    from storage.remote import remote_enabled
+
+    if remote_enabled():
+        # Remote writes already upsert complete, sorted dayfiles.
+        return
     for tf in TFs:
         res = compact_day(tf, day, delete_parts=True)
         print(f"[compact {tf} {day}] -> {res}")

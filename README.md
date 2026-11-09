@@ -21,11 +21,16 @@ engine can run it.
 
 ## Current state
 
-The engine works as a long-running local Python process, but it is **not yet
-VPS-ready**. Market data, objects, trade events, configuration, and some runtime
-state are still file-backed. It also owns a direct Discord connection. Remote
-storage, automation-harness lifecycle management, and discord-hub transport are
-separate migrations; this repository does not pretend they are already done.
+The engine's durable data is remote: candles/objects use R2 + DuckDB with a
+Postgres catalog, while trade events and runtime config/state use Postgres. The
+local project `.env` selects `TRADING_STORAGE_BACKEND=r2`; `local` remains the
+rollback backend and historical local files are retained under the deletion
+gate. Temporary logs/charts and derived calculation files are disposable.
+
+The process is **not yet VPS-ready**: it still owns a direct Discord connection
+and its own lifecycle. automation-harness and discord-hub migrations have their
+own dedicated session prompts. Raw quote capture stays disabled in remote mode
+until it has an R2 implementation.
 
 ## Requirements
 

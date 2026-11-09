@@ -12,6 +12,16 @@ import paths
 MARKET_TZ = 'America/Chicago'
 DEBUG_VIEWPORT = os.getenv("DEBUG_VIEWPORT") == "1"
 
+
+def _connect():
+    from storage.remote import get_remote_store, remote_enabled
+
+    connection = duckdb.connect(":memory:")
+    if remote_enabled():
+        get_remote_store().configure_duckdb(connection)
+    return connection
+
+
 def _to_local_naive_iso_bound(s: str) -> str:
     """
     Convert any ISO string (with/without offset) into a local-naive ISO
@@ -28,7 +38,7 @@ def _to_local_naive_iso_bound(s: str) -> str:
 def _parquet_has_column(file_list, column_name: str) -> bool:
     if not file_list:
         return False
-    con = duckdb.connect(":memory:")
+    con = _connect()
     try:
         # LIMIT 0 returns schema only, fast; union_by_name handles mixed schemas
         desc = con.execute(
@@ -41,6 +51,12 @@ def _parquet_has_column(file_list, column_name: str) -> bool:
         con.close()
 
 def _collect_candle_files(timeframe: str, include_days: bool, include_parts: bool):
+    from storage.remote import get_remote_store, remote_enabled
+
+    if remote_enabled():
+        # R2 stores complete dayfiles; live and EOD readers use the same current object.
+        return get_remote_store().list_candle_urls(timeframe)
+
     # Use a set of real (resolved) paths to avoid duplicates on case-insensitive filesystems
     seen = set()
     out = []
@@ -85,7 +101,7 @@ def get_timeframe_bounds(
     files = _collect_candle_files(timeframe, include_days, include_parts)
     if not files:
         return None, None, 0
-    con = duckdb.connect(":memory:")
+    con = _connect()
     row = con.execute(f"""
         WITH src AS (SELECT * FROM read_parquet(?, union_by_name=1)),
             norm AS (SELECT {_ts_sql_expr()} AS ts FROM src WHERE ts IS NOT NULL)
@@ -110,7 +126,7 @@ def pick_distinct_trading_dates_sql(
     if not files or days < 1:
         return []
 
-    con = duckdb.connect(":memory:")
+    con = _connect()
 
     # Build WHERE fragments
     where_sym  = "AND symbol = ?" if symbol else ""
@@ -188,7 +204,7 @@ def load_viewport(*,
     y0: float | None = None,
     y1: float | None = None,
 ):
-    con = duckdb.connect(":memory:")
+    con = _connect()
     cand_files = _collect_candle_files(timeframe, include_days, include_parts)
 
     if not cand_files:

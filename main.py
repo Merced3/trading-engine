@@ -142,6 +142,13 @@ async def start_options_runtime(
         )
         record_quotes = bool(read_config("RECORD_OPTIONS_QUOTES"))
         if record_quotes:
+            from storage.remote import remote_enabled
+
+            if remote_enabled():
+                raise RuntimeError(
+                    "Raw quote capture is not implemented for R2; "
+                    "keep RECORD_OPTIONS_QUOTES=false in remote mode"
+                )
             record_dir = read_config("OPTIONS_QUOTES_DIR")
             output_dir = Path(record_dir) if record_dir else OPTIONS_QUOTES_DIR
             day = trading_day or datetime.now(NY_TZ).strftime("%Y-%m-%d")

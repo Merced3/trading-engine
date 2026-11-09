@@ -68,6 +68,15 @@ def _ensure_dirs():
 # ───🔹 LOADERS ───────────────────────────────────────────────────────────
 
 def load_current_objects(columns: list[str] | None = None) -> pd.DataFrame:
+    from storage.remote import get_remote_store, remote_enabled
+
+    if remote_enabled():
+        df = get_remote_store().read_dataframe(get_remote_store().current_objects_key())
+        df = _enforce_schema(df)
+        if columns:
+            return df[columns]
+        return df
+
     _ensure_dirs()
     try:
         df = pd.read_parquet(_cur_path())
@@ -87,6 +96,11 @@ def load_timeline_day(day: str) -> pd.DataFrame:
     """
     Load timeline events for YYYY-MM-DD, or empty frame if missing.
     """
+    from storage.remote import get_remote_store, remote_enabled
+
+    if remote_enabled():
+        return get_remote_store().read_dataframe(get_remote_store().timeline_key(day))
+
     p = _timeline_dir() / day[:7] / f"{day}.parquet"
     try:
         return pd.read_parquet(p)
@@ -139,9 +153,21 @@ def write_current_objects(df: pd.DataFrame) -> None:
     """
     Atomically write the current snapshot parquet file.
     """
-    _ensure_dirs()
     df = _enforce_schema(df)
+    from storage.remote import get_remote_store, remote_enabled
 
+    if remote_enabled():
+        store = get_remote_store()
+        store.write_dataframe(
+            key=store.current_objects_key(),
+            frame=df,
+            dataset="objects_current",
+            source_path="storage/objects/current/objects.parquet",
+            quality="snapshot",
+        )
+        return
+
+    _ensure_dirs()
     out = _cur_path()
     tmp = out.with_name(out.name + ".tmp")
 
@@ -185,8 +211,6 @@ def append_timeline_events(events: pd.DataFrame) -> Path:
     Partition by day under TIMELINE_OBJECTS_DIR/YYYY-MM/YYYY-MM-DD.parquet
     """
 
-    _ensure_dirs()
-
     if "ts" not in events.columns:
         raise ValueError("events must include 'ts' column")
 
@@ -202,11 +226,22 @@ def append_timeline_events(events: pd.DataFrame) -> Path:
     day = ev["ts"].dt.tz_convert("UTC").dt.normalize().iloc[0]
     day_str = day.strftime("%Y-%m-%d")
     month_dir = _timeline_dir() / day_str[:7]
-    month_dir.mkdir(parents=True, exist_ok=True)
     out = month_dir / f"{day_str}.parquet"
 
-    try:
-        old = pd.read_parquet(out)
+    from storage.remote import get_remote_store, remote_enabled
+
+    remote = remote_enabled()
+    if not remote:
+        month_dir.mkdir(parents=True, exist_ok=True)
+    if remote:
+        store = get_remote_store()
+        old = store.read_dataframe(store.timeline_key(day_str))
+    else:
+        try:
+            old = pd.read_parquet(out)
+        except FileNotFoundError:
+            old = pd.DataFrame()
+    if not old.empty:
         # align columns
         need_old = [c for c in ev.columns if c not in old.columns]
         need_ev  = [c for c in old.columns if c not in ev.columns]
@@ -222,12 +257,21 @@ def append_timeline_events(events: pd.DataFrame) -> Path:
             if c in ev.columns:  ev[c]  = pd.to_numeric(ev[c],  errors="coerce")
 
         df = pd.concat([old, ev], ignore_index=True, sort=False)
-    except FileNotFoundError:
+    else:
         df = ev
 
     step_col = "day_step" if "day_step" in df.columns else "step"
     df = df.sort_values([step_col, "ts", "object_id"]).reset_index(drop=True)
     
+    if remote:
+        store.write_dataframe(
+            key=store.timeline_key(day_str),
+            frame=df,
+            dataset="objects_timeline",
+            source_path=f"storage/objects/timeline/{day_str[:7]}/{day_str}.parquet",
+        )
+        return out
+
     # write atomically with retries helper function
     tmp = out.with_name(out.name + ".tmp")
     df.to_parquet(tmp, index=False)
@@ -277,7 +321,15 @@ def build_asof_snapshot_from_timeline(step: int,
     Reconstruct the last-known state of each object up to 'step' (inclusive)
     from daily-partitioned timeline parquet files.
     """
-    parts = sorted(_timeline_dir().rglob("*.parquet"))
+    from storage.remote import get_remote_store, remote_enabled
+
+    remote = remote_enabled()
+    store = get_remote_store() if remote else None
+    parts = (
+        store.list_dataset_keys("objects_timeline")
+        if remote
+        else sorted(_timeline_dir().rglob("*.parquet"))
+    )
     if not parts:
         return pd.DataFrame(columns=["id","type","left","y","top","bottom","status","symbol","timeframe"])
 
@@ -286,7 +338,8 @@ def build_asof_snapshot_from_timeline(step: int,
     tdfs = []
     for p in parts:
         try:
-            tdfs.append(pd.read_parquet(p, columns=[c for c in cols if c in pd.read_parquet(p, nrows=0).columns]))
+            frame = store.read_dataframe(p) if remote else pd.read_parquet(p)
+            tdfs.append(frame[[c for c in cols if c in frame.columns]])
         except Exception:
             pass
     if not tdfs:

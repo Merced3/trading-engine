@@ -12,17 +12,22 @@ This roadmap lists concrete migration work, not aspirational trading features.
   multi-timeframe strategies and trade analytics.
 - Establish a clean offline test baseline.
 
-## Next: durable remote data
+## Completed: durable remote data
 
 Follow `Automations/ops/session-prompts/platform/P2f-trading-data-lake.md`:
 
-1. Finish the read/write inventory and present the R2/Postgres design for review.
-2. Upload existing Parquet with row-count and checksum verification.
-3. Query R2 Parquet remotely with DuckDB; compare one Postgres-loaded slice.
-4. Add storage adapters and tests, then explicitly cut over engine reads/writes.
-5. Keep a disposable local cache only where it has a measured purpose.
+1. Inventoried and reviewed the R2/Postgres design.
+2. Uploaded 3,372 valid Parquet files with per-file checksums and remote row-count
+   reconciliation (122,196 rows); two invalid placeholders were rejected.
+3. Queried R2 through DuckDB and compared one 195-row Postgres-loaded slice.
+4. Cut over candles/objects, trade events, config, and durable JSON state behind
+   `TRADING_STORAGE_BACKEND=r2`; verified actual remote reads and idempotent
+   writes. The rollback backend is `local`.
+5. Kept local history only as deletion-gated rollback evidence. Derived caches,
+   charts, and logs are disposable, never authoritative.
 
-Historical data must not be deleted as part of the initial upload.
+Normalized run/order/signal projections can be added when their query needs are
+concrete; the raw trade-event record and strategy analytics are already remote.
 
 ## After storage: service deployment
 

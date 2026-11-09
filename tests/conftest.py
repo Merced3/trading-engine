@@ -1,7 +1,11 @@
 # tests/conftest.py
+import os
 import sys
 from pathlib import Path
 from types import ModuleType
+
+# Never let a developer's live backend selection leak into the offline suite.
+os.environ.setdefault("TRADING_STORAGE_BACKEND", "local")
 
 # Ensure project root is importable for all tests (CI runners may omit it).
 ROOT_DIR = Path(__file__).resolve().parents[1]

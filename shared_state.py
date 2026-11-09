@@ -66,6 +66,13 @@ def safe_read_json(file_path, retries=5, delay=0.1, default=None, indent_lvl=Non
     if not isinstance(file_path, Path):
         file_path = Path(file_path)
 
+    from storage.remote import remote_enabled
+
+    if remote_enabled():
+        from storage.runtime_state import read_state
+
+        return read_state(file_path, default=default)
+
     for attempt in range(retries):
         try:
             with open(file_path, 'r') as f:
@@ -133,6 +140,14 @@ def safe_write_json(file_path, content, retries=5, delay=0.1, indent_lvl=None):
     """
     if not isinstance(file_path, Path):
         file_path = Path(file_path)
+
+    from storage.remote import remote_enabled
+
+    if remote_enabled():
+        from storage.runtime_state import write_state
+
+        write_state(file_path, content)
+        return True
 
     for attempt in range(retries):
         try:

@@ -1,32 +1,38 @@
 # utils/json_utils.py, Load/save/validate JSON, config helpers
 from pathlib import Path
 import json
-from shared_state import indent, print_log, safe_write_json
+from shared_state import indent, print_log, safe_read_json, safe_write_json
 from utils.file_utils import get_current_candle_index
 import pandas as pd
-import os
 from paths import pretty_path, get_ema_path, CONFIG_PATH, MESSAGE_IDS_PATH, ORDER_CANDLE_TYPE_PATH, PRIORITY_CANDLES_PATH, LINE_DATA_PATH
 
 def read_config(key=None):
-    """Reads the configuration file and optionally returns a specific key."""
-    with CONFIG_PATH.open("r") as f:
-        config = json.load(f)
+    """Reads the configuration and optionally returns a specific key."""
+    from storage.remote import remote_enabled
+
+    if remote_enabled():
+        from storage.runtime_state import read_config as read_remote_config
+
+        config = read_remote_config()
+    else:
+        with CONFIG_PATH.open("r") as f:
+            config = json.load(f)
     if key is None:
         return config  # Return the whole config if no key is provided
     return config.get(key)  # Return the specific key's value or None if key doesn't exist
 
 def load_message_ids():
-    if os.path.exists(MESSAGE_IDS_PATH):
-        with open(MESSAGE_IDS_PATH, 'r') as f:
-            try:
-                return json.load(f)
-            except json.JSONDecodeError:
-                return {}
-    else:
-        return {}
+    return safe_read_json(MESSAGE_IDS_PATH, default={})
 
 def update_config_value(key, value):
-    """Update a single key in the config file with a new value."""
+    """Update one config value without overwriting concurrent changes."""
+    from storage.remote import remote_enabled
+
+    if remote_enabled():
+        from storage.runtime_state import update_config_value as update_remote_config
+
+        update_remote_config(key, value)
+        return
     with open(CONFIG_PATH, 'r') as f:
         config = json.load(f)
     config[key] = value
@@ -39,30 +45,19 @@ def load_json_df(file_path):
     return pd.DataFrame(data)
 
 def initialize_json(json_path, default_value=[]):
-    """Ensure the JSON file exists and is valid; initialize if not."""
-    if not os.path.exists(json_path) or os.stat(json_path).st_size == 0:
-        with open(json_path, 'w') as file:
-            json.dump(default_value, file)  # Initialize with the default value
-    try:
-        with open(json_path, 'r') as file:
-            return json.load(file) if isinstance(json.load(file), list) else []
-    except json.JSONDecodeError:
-        return []
+    """Ensure JSON state exists and return its list payload."""
+    data = safe_read_json(json_path, default=default_value)
+    if not isinstance(data, list):
+        data = []
+        safe_write_json(json_path, data)
+    return data
     
 def reset_json(file_path, contents):
-    with open(file_path, 'w') as f:
-        json.dump(contents, f, indent=4)
-        print_log(f"[RESET] Cleared file: `{pretty_path(file_path)}`")
+    safe_write_json(file_path, contents)
+    print_log(f"[RESET] Cleared state: `{pretty_path(file_path)}`")
 
 def get_correct_message_ids():
-    if os.path.exists(MESSAGE_IDS_PATH):
-        with open(MESSAGE_IDS_PATH, 'r') as file:
-            json_message_ids_dict = json.load(file)
-            #print (f"{json_message_ids_dict}")
-    else:
-        json_message_ids_dict = {}
-    
-    return json_message_ids_dict
+    return load_message_ids()
 
 def add_candle_type_to_json(candle_type):
     # Read the current contents of the file, or initialize an empty list if file does not exist
@@ -169,22 +164,9 @@ def resolve_flags(indent_level):
         json.dump(updated_line_data, file, indent=4)
 
 def save_message_ids(order_id, message_id):
-    # Load existing data
-    if MESSAGE_IDS_PATH.exists():
-        with open(MESSAGE_IDS_PATH, 'r') as f:
-            try:
-                existing_data = json.load(f)
-            except json.JSONDecodeError:
-                existing_data = {}
-    else:
-        existing_data = {}
-
-    # Update existing data with new data
+    existing_data = load_message_ids()
     existing_data[order_id] = message_id
-
-    # Write updated data back to file
-    with open(MESSAGE_IDS_PATH, 'w') as f:
-        json.dump(existing_data, f, indent=4)
+    safe_write_json(MESSAGE_IDS_PATH, existing_data)
 
 def EOD_reset_all_jsons():
     """

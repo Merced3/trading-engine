@@ -9,7 +9,7 @@ import json
 from utils.timezone import NY_TZ
 import time
 from error_handler import error_log_and_discord_message
-from shared_state import price_lock, indent, print_log
+from shared_state import price_lock, indent, print_log, safe_read_json, safe_write_json
 from utils.json_utils import read_config
 from utils.data_utils import get_dates
 from utils.file_utils import get_current_candle_index
@@ -228,24 +228,11 @@ async def add_markers(event_type, x=None, y=None, percentage=None, live_tf="2M",
     }
 
     marker_path = get_markers_path(live_tf)
-    marker_path.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        if not marker_path.exists():
-            with open(marker_path, 'w') as f:
-                json.dump([], f)
-
-        with open(marker_path, 'r') as f:
-            markers = json.load(f)
-        # Ensure markers is a list
-        if not isinstance(markers, list):
-            markers = []
-    except (json.decoder.JSONDecodeError, FileNotFoundError):
+    markers = safe_read_json(marker_path, default=[])
+    if not isinstance(markers, list):
         markers = []
-
     markers.append(marker)
-    with open(marker_path, 'w') as f:
-        json.dump(markers, f, indent=4)
+    safe_write_json(marker_path, markers)
 
 async def get_candle_data_and_merge(candle_interval, candle_timescale, am_label, pm_label, indent_lvl, timeframe):
     max_ema_window = max([window for window, _ in read_config("EMAS")])

@@ -11,10 +11,10 @@ Provider stream/REST
   → trade-event ledger and performance reports
 ```
 
-Candles and objects currently use local Parquet. Trade events use JSONL; EMA,
-marker, calendar, and reporting state use JSON; charts and logs are local files.
-DuckDB provides query helpers over Parquet. The R2/Postgres replacement is not
-implemented yet.
+With `TRADING_STORAGE_BACKEND=r2`, candles and objects use R2 Parquet, DuckDB,
+and the Postgres file catalog. Trade events and durable config/JSON state use
+Postgres. `local` selects the legacy file backend for rollback. Charts, logs,
+and derived calculation files are disposable and are never authoritative.
 
 ## Subsystems
 
